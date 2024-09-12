@@ -1,15 +1,7 @@
 # rrulejs
 
-To install dependencies:
+This project aims to create a modern, flexible approach to the iCalendar Recurrence Specification detailed in [RFC2445](https://www.rfc-editor.org/rfc/rfc2445#section-4.8.5).
 
-```bash
-bun install
-```
+## Progress
 
-To run:
-
-```bash
-bun run index.ts
-```
-
-This project was created using `bun init` in bun v1.1.26. [Bun](https://bun.sh) is a fast all-in-one JavaScript runtime.
+* [ ] 4.8.5.1
