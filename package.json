@@ -2,6 +2,9 @@
   "name": "rrulejs",
   "module": "index.ts",
   "type": "module",
+  "scripts": {
+    "spec": "open https://www.rfc-editor.org/rfc/rfc2445#section-4.8.5"
+  },
   "devDependencies": {
     "@types/bun": "latest"
   },
