@@ -69,10 +69,59 @@
      EXDATE:19960402T010000Z,19960403T010000Z,19960404T010000Z
 */
 
-const exdateValueKey = "VALUE" as const
-const exdateValueDateTime = "DATE-TIME" as const;
-const exdateValueDate = "DATE" as const;
+import type { TimeZoneIdentifier } from "./timezone";
+import type { XParam } from "./xparam";
+import { iCalDate } from "./iCalDate";
+import { iCalDatetime } from "./iCalDatetime";
 
 export class Exdate {
-    static PREFIX = "EXDATE";
+    public value?: "DATE-TIME" | "DATE";
+    public timeZone?: TimeZoneIdentifier;
+    public xParam?: XParam[]
+    public dates: Date[]
+
+    constructor({ value, timeZone, xParam, date }: ExdateOptions) {
+        this.value = value;
+        this.timeZone = timeZone;
+        this.xParam = xParam
+            ? Array.isArray(xParam)
+                ? xParam
+                : [xParam]
+            : undefined;
+        this.dates = Array.isArray(date)
+                ? date
+                : [date]
+    }
+
+    toString() {
+        return `EXDATE${this.exdtparam}:${this.exdtval}`;
+    }
+
+    private get exdtparam() {
+        let out = '';
+        if (this.value) out += `;VALUE=${this.value}`
+        // Ignore; handled in datetime formatting
+        // if (this.timeZone) out += `;${this.timeZone}`
+        if (this.xParam) out += this.xParam.map(xp => `;${xp}`);
+        return out;
+    }
+
+    private get exdtval() {
+        return this.dates
+            .map(date => {
+                if (this.value === "DATE") return new iCalDate(date);
+                let dt = new iCalDatetime(date);
+                if (this.timeZone) dt = dt.inTimeZone(this.timeZone);
+                return dt;
+            })
+            .join(',');
+    }
+}
+
+type ExdateOptions = Partial<{
+    value: typeof Exdate.prototype.value;
+    timeZone: typeof Exdate.prototype.timeZone;
+    xParam: XParam | XParam[];
+}> & {
+    date: Date | Date[];
 }
