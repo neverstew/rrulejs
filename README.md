@@ -4,4 +4,5 @@ This project aims to create a modern, flexible approach to the iCalendar Recurre
 
 ## Progress
 
-* [ ] 4.8.5.1
+* [x] 4.2.19 Time Zone Identifier
+* [ ] 4.8.5.1 Exdate
