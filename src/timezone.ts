@@ -57,8 +57,14 @@
    For more information see the sections on the data types DATE-TIME and
    TIME.
  */
+import * as v from "valibot";
+
 export class TimeZoneIdentifier {
     public timeZone: string;
+
+    static parse(str: string) {
+      return v.parse(TimeZoneIdentifierInputSchema, str);
+    }
 
     constructor(timeZone: string) {
         this.timeZone = timeZone;
@@ -68,3 +74,12 @@ export class TimeZoneIdentifier {
         return `TZID=${this.timeZone}`;
     }
 }
+
+const TimeZoneIdentifierInputSchema = v.pipe(
+  v.string(),
+  v.startsWith('TZID='),
+  v.transform(input => {
+      const [_, value] = input.split('=')
+      return new TimeZoneIdentifier(value);
+  }),
+)
