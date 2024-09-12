@@ -12,7 +12,7 @@ This project aims to create a modern, flexible approach to the iCalendar Recurre
   * [x] parsing
 * [x] 4.3.4 Date
   * [x] creating
-  * [ ] parsing
+  * [x] parsing
 * [x] 4.3.5 Date time
   * Design decision: no floating date times -- they only mess things up
   * Design decision: no time zones -- always convert to UTC
