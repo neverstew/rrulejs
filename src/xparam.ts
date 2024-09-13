@@ -16,7 +16,7 @@ const XParamInputSchema = v.pipe(
 
 export class XParam {
     public name: string;
-    public value: string | string[];
+    public value: string[];
 
     static parse(str: string) {
         return v.parse(XParamInputSchema, str);
@@ -24,7 +24,7 @@ export class XParam {
 
     constructor({ name, value }: { name: string, value: string | string[] }) {
         this.name = name;
-        this.value = value;
+        this.value = Array.isArray(value) ? value : [value];
     }
 
     toString() {
@@ -32,9 +32,6 @@ export class XParam {
     }
 
     get joinedValues() {
-        if (Array.isArray(this.value)) {
-            return this.value.join(",")
-        }
-        return this.value;
+        return this.value.join(",")
     }
 }

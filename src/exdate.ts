@@ -69,16 +69,22 @@
      EXDATE:19960402T010000Z,19960403T010000Z,19960404T010000Z
 */
 
-import type { TimeZoneIdentifier } from "./timezone";
-import type { XParam } from "./xparam";
+import { TimeZoneIdentifier } from "./timezone";
+import { XParam } from "./xparam";
 import { iCalDate } from "./iCalDate";
 import { iCalDatetime } from "./iCalDatetime";
+import * as v from "valibot";
+import { parseISO } from "date-fns/parseISO";
 
 export class Exdate {
     public value?: "DATE-TIME" | "DATE";
     public timeZone?: TimeZoneIdentifier;
     public xParam?: XParam[]
     public dates: Date[]
+
+    static parse(str: string) {
+        return v.parse(ExdateInputSchema, str);
+    }
 
     constructor({ value, timeZone, xParam, date }: ExdateOptions) {
         this.value = value;
@@ -89,8 +95,8 @@ export class Exdate {
                 : [xParam]
             : undefined;
         this.dates = Array.isArray(date)
-                ? date
-                : [date]
+            ? date
+            : [date]
     }
 
     toString() {
@@ -102,7 +108,7 @@ export class Exdate {
         if (this.value) out += `;VALUE=${this.value}`
         // Ignore; handled in datetime formatting
         // if (this.timeZone) out += `;${this.timeZone}`
-        if (this.xParam) out += this.xParam.map(xp => `;${xp}`);
+        if (this.xParam && this.xParam.length > 0) out += this.xParam.map(xp => `;${xp}`);
         return out;
     }
 
@@ -125,3 +131,52 @@ type ExdateOptions = Partial<{
 }> & {
     date: Date | Date[];
 }
+
+const ExdateInputSchema = v.pipe(
+    v.string(),
+    v.regex(/EXDATE.*:.+/),
+    v.transform(input => {
+        const [before, exdtval] = input.split(':');
+        const options = before
+            .slice(6)
+            .split(';')
+            .reduce((agg, param) => {
+                if (param.length === 0) return agg;
+                const result = v.parse(ExdateParamSchema, param);
+                if (!result) return agg;
+                if (result instanceof XParam) {
+                    agg.xParam.push(result);
+                } else if (result instanceof TimeZoneIdentifier) {
+                    agg.timeZone = result;
+                } else {
+                    agg.value = result;
+                }
+                return agg;
+            }, { value: undefined, timeZone: undefined, xParam: [] } as {
+                value: typeof Exdate.prototype.value;
+                timeZone: typeof Exdate.prototype.timeZone;
+                xParam: XParam[];
+            });
+
+        const date = exdtval
+            .split(',')
+            .map(str => parseISO(str));
+
+        return new Exdate({ ...options, date })
+    })
+)
+
+const ExdateParamSchema = v.pipe(
+    v.string(),
+    v.transform(input => {
+        if (input.startsWith('VALUE')) return v.parse(ExdateValueInputSchema, input);
+        if (input.startsWith(TimeZoneIdentifier.paramName)) return TimeZoneIdentifier.parse(input);
+        return XParam.parse(input);
+    })
+)
+
+const ExdateValueInputSchema = v.pipe(
+    v.string(),
+    v.regex(/VALUE=(DATE|DATE-TIME)$/),
+    v.transform(input => input.split('=')[1] as typeof Exdate.prototype.value)
+)

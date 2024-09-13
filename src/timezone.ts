@@ -60,6 +60,7 @@
 import * as v from "valibot";
 
 export class TimeZoneIdentifier {
+    static paramName = "TZID" as const;
     public timeZone: string;
 
     static parse(str: string) {
@@ -70,14 +71,14 @@ export class TimeZoneIdentifier {
         this.timeZone = timeZone;
     }
 
-    toString(): `TZID=${string}` {
-        return `TZID=${this.timeZone}`;
+    toString() {
+        return `${TimeZoneIdentifier.paramName}=${this.timeZone}` as const;
     }
 }
 
 const TimeZoneIdentifierInputSchema = v.pipe(
   v.string(),
-  v.startsWith('TZID='),
+  v.startsWith(`${TimeZoneIdentifier.paramName}=`),
   v.transform(input => {
       const [_, value] = input.split('=')
       return new TimeZoneIdentifier(value);

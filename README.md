@@ -20,4 +20,4 @@ This project aims to create a modern, flexible approach to the iCalendar Recurre
   * [x] parsing
 * [x] 4.8.5.1 Exdate
   * [x] creating
-  * [ ] parsing
+  * [x] parsing
